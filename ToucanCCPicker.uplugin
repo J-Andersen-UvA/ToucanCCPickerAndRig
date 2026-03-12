@@ -1,0 +1,12 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0",
+  "FriendlyName": "Toucan CC Picker",
+  "Description": "Control Rig picker for Toucan rigs",
+  "Category": "Animation",
+  "CreatedBy": "You",
+  "Modules": [],
+  "CanContainContent": true,
+  "EnabledByDefault": true
+}
