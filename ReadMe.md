@@ -7,7 +7,7 @@ The Picker also uses functions from the sequencerabstraction repo: https://githu
 ## Functionalities
 Besides the present functionalities from the CC Rig and Picker, the Toucan version Picker adds:
 - A more compact picker
-- The ability to shift click the picker (so you can mult select)
+- The ability to shift/ctrl click the picker (so you can mult (de)select)
 - Zero'ing keyframe shortcut
 - ReKey shortcut
 - Finger and body control visualize option that removes old keys where necesary
