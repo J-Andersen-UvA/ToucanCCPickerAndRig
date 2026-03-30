@@ -6,7 +6,13 @@
   "Description": "Control Rig picker for Toucan rigs",
   "Category": "Animation",
   "CreatedBy": "You",
-  "Modules": [],
+  "Modules": [
+    {
+      "Name": "ToucanCCPickerEditor",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    }
+  ],
   "CanContainContent": true,
   "EnabledByDefault": true
 }
