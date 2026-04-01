@@ -24,7 +24,12 @@ public class ToucanCCPickerEditor : ModuleRules
                 "EditorFramework",
                 "LevelEditor",
                 "InputCore",
-                "Projects"
+                "Projects",
+                "ControlRig",
+                "ControlRigEditor",
+                "LevelSequence",
+                "MovieScene",
+                "MovieSceneTools"
             }
         );
     }
