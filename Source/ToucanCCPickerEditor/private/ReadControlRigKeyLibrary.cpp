@@ -128,6 +128,65 @@ namespace
 		}
 	}
 
+	static bool evaluateRigAtFrameForRotationScan(
+		ULevelSequence* sequence,
+		UControlRig* controlRig,
+		const TArray<FRigElementKey>& rigKeys,
+		FFrameNumber frame
+	)
+	{
+		if (!IsValid(sequence) || !IsValid(controlRig))
+		{
+			return false;
+		}
+
+		// GetLocalControlRigRotator evaluates the entire focused sequence synchronously.
+		// Do that once for the rig, then read every control from the evaluated hierarchy.
+		for (const FRigElementKey& rigKey : rigKeys)
+		{
+			const FRigControlElement* control = controlRig->FindControl(rigKey.Name);
+			if (control && control->Settings.ControlType == ERigControlType::Rotator)
+			{
+				UControlRigSequencerEditorLibrary::GetLocalControlRigRotator(
+					sequence,
+					controlRig,
+					rigKey.Name,
+					frame,
+					EMovieSceneTimeUnit::DisplayRate
+				);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	static void appendModifiedRotatorControls(
+		UControlRig* controlRig,
+		const TArray<FRigElementKey>& rigKeys,
+		float tolerance,
+		TArray<FRigElementKey>& outModifiedKeys
+	)
+	{
+		for (const FRigElementKey& rigKey : rigKeys)
+		{
+			const FRigControlElement* control = controlRig->FindControl(rigKey.Name);
+			if (!control || control->Settings.ControlType != ERigControlType::Rotator)
+			{
+				continue;
+			}
+
+			const FRigControlValue rigValue = controlRig->GetControlValue(rigKey.Name);
+			const FRotator currentRotation =
+				FRotator::MakeFromEuler((FVector)rigValue.Get<FVector3f>());
+
+			if (isRotatorModified(currentRotation, FRotator::ZeroRotator, tolerance))
+			{
+				outModifiedKeys.Add(rigKey);
+			}
+		}
+	}
+
 	static bool isRigStillBoundToSequence(ULevelSequence* sequence, UControlRig* controlRig)
 	{
 		if (!IsValid(sequence) || !IsValid(controlRig))
@@ -961,21 +1020,9 @@ void UReadControlRigKeyLibrary::getModifiedControlsInSequenceAtFrame(
 			continue;
 		}
 
-		for (const FRigElementKey& rigKey : pair.Value)
+		if (evaluateRigAtFrameForRotationScan(sequence, controlRig, pair.Value, discreteFrame))
 		{
-			const FRotator currentRotation =
-				UControlRigSequencerEditorLibrary::GetLocalControlRigRotator(
-					sequence,
-					controlRig,
-					rigKey.Name,
-					discreteFrame,
-					EMovieSceneTimeUnit::DisplayRate
-				);
-
-			if (isRotatorModified(currentRotation, FRotator::ZeroRotator, tolerance))
-			{
-				outModifiedKeys.Add(rigKey);
-			}
+			appendModifiedRotatorControls(controlRig, pair.Value, tolerance, outModifiedKeys);
 		}
 	}
 }
@@ -1009,21 +1056,9 @@ void UReadControlRigKeyLibrary::getModifiedControlsFromCacheAtFrame(
 			continue;
 		}
 
-		for (const FRigElementKey& rigKey : pair.Value)
+		if (evaluateRigAtFrameForRotationScan(cache.sequence, controlRig, pair.Value, discreteFrame))
 		{
-			const FRotator currentRotation =
-				UControlRigSequencerEditorLibrary::GetLocalControlRigRotator(
-					cache.sequence,
-					controlRig,
-					rigKey.Name,
-					discreteFrame,
-					EMovieSceneTimeUnit::DisplayRate
-				);
-
-			if (isRotatorModified(currentRotation, FRotator::ZeroRotator, tolerance))
-			{
-				outModifiedKeys.Add(rigKey);
-			}
+			appendModifiedRotatorControls(controlRig, pair.Value, tolerance, outModifiedKeys);
 		}
 	}
 }
